@@ -1,0 +1,122 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Test Search and Results</title>
+    <style>
+        table {
+            border-collapse: collapse;
+            width: 100%;
+        }
+
+        th, td {
+            border: 1px solid black;
+            text-align: left;
+            padding: 8px;
+        }
+
+        th {
+            background-color: #f2f2f2;
+        }
+
+        select[name="search_type"], button[type="submit"], input[name="search_term"], input[name="start_date"], input[name="end_date"],select[name="status"] {
+            padding: 20px;
+            font-size: 20px;
+        }
+
+        .success-row {
+            background-color: lightgreen;
+        }
+
+        .fail-row {
+            background-color: #ff7f7f;
+        }
+
+        .timeout-row {
+            background-color: #E3963E;
+        }
+        .center {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 60vh;
+        }
+    </style>
+</head>
+<body>
+    <div id="searchSection">
+        <h1>Search for Test Information</h1>
+        <form method="get">
+            <select name="search_type">
+                <option value="" selected disabled>Select Search Type</option>
+                <option value="test_name" {% if request.GET.search_type == "test_name" %}selected{% endif %}>Search by Test Name</option>
+                <option value="run_summary" {% if request.GET.search_type == "run_summary" %}selected{% endif %}>Search by Run Summary</option>
+            </select>
+            <input type="text" name="search_term" placeholder="Enter Name" value="{{ request.GET.search_term }}" required>
+
+            <select name="status">
+                <option value="" selected disabled>Select Status</option>
+                <option value="Success" {% if request.GET.status == "Success" %}selected{% endif %}>Success</option>
+                <option value="Fail" {% if request.GET.status == "Fail" %}selected{% endif %}>Fail</option>
+                <option value="Timeout" {% if request.GET.status == "Timeout" %}selected{% endif %}>Timeout</option>
+                <option value="ALL" {% if request.GET.status == "ALL" %}selected{% endif %}>All</option>
+            </select>
+            <input type="date" name="start_date" value="{{ request.GET.start_date }}" required>
+            <input type="date" name="end_date" value="{{ request.GET.end_date }}">
+            <button type="submit">Search</button>
+        </form>
+    </div>
+
+    <div id="results">
+        {% if test_data %}
+            <h1>Test Results for: {{ request.GET.search_term }}</h1>
+            <table>
+                <thead>
+                    <tr>
+                        <th>ID</th>
+                        <th>Summary File</th>
+                        <th>Date</th>
+                        <th>Time</th>
+                        <th>Test Name</th>
+                        <th>Test Date</th>
+                        <th>Test Time</th>
+                        <th>Status</th>
+                        <th>Log File</th>
+                        <th>HTML Report</th>
+                        <th>Video File</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for result in test_data %}
+                    <tr class="{% if result.status == 'Succeeded Test(s)' %}success-row{% elif result.status == 'Failed Test(s)' %}fail-row{% elif result.status == 'Timeout Test(s)' %}timeout-row{% endif %}">
+                        <td>{{ result.id }}</td>
+                        <td><a href="{{ result.summary_file }}">{{ result.summary_file }}</a></td>
+                        <td>{{ result.date }}</td>
+                        <td>{{ result.time }}</td>
+                        <td>{{ result.test_name }}</td>
+                        <td>{{ result.test_date }}</td>
+                        <td>{{ result.test_time }}</td>
+                        <td>{% if result.status == 'Succeeded Test(s)' %}Success{% elif result.status == 'Failed Test(s)' %}Fail{% elif result.status == 'Timeout Test(s)' %}Timeout{% endif %}</td>
+                        <td><a href="{{ result.log_file }}">{{ result.log_file }}</a></td>
+                        <td><a href="{{ result.html_report }}">{{ result.html_report }}</a></td>
+                        <td><a href="{{ result.video_file }}">{{ result.video_file }}</a></td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+
+            {% elif request.GET.search_term or request.GET.start_date %}
+        {% if not test_data %}
+            <div class="center">
+                <h1>No Match Found</h1>
+            </div>
+        {% endif %}
+    {% elif request.GET.status %}
+        {% if not test_data %}
+            <div class="center">
+                <h1>No Match Found</h1>
+            </div>
+        {% endif %}
+    {% endif %}
+    </div>
+</body>
+</html>

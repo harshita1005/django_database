@@ -1,0 +1,13 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Test Search</title>
+</head>
+<body>
+    <h1>Search for Test Information</h1>
+    <form action="{% url 'test_results' %}" method="get">
+        <input type="text" name="test_name" placeholder="Enter Test Name">
+        <button type="submit">Search</button>
+    </form>
+</body>
+</html>
